@@ -12,7 +12,6 @@ let coletaveis = [];
 let dinheiro = 0;
 let coletaveisCriados = false;
 
-// Vida
 let vida = 100;
 let vidaMaxima = 100;
 
@@ -69,7 +68,6 @@ function draw() {
         criarColetaveis();
     }
 
-    // Câmera
     if (larguraMapa > 0) {
         cameraX = jogador.x - width / 2 + jogador.largura / 2;
 
@@ -80,21 +78,16 @@ function draw() {
         );
     }
 
-    // Cenário
     desenharMapa1(cameraX);
 
-    // Mundo do jogo
     push();
     translate(-cameraX, 0);
 
-    // Personagem
     jogador.atualizar();
 
-    // Bolas arremessadas
     jogador.arremesso.atualizar();
     jogador.arremesso.desenhar();
 
-    // Moedas
     for (let i = coletaveis.length - 1; i >= 0; i--) {
         let moeda = coletaveis[i];
 
@@ -107,7 +100,6 @@ function draw() {
 
     pop();
 
-    // HUD
     hud.desenhar(dinheiro);
     hud.desenharVida(vida, vidaMaxima);
 }

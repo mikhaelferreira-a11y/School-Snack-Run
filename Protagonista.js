@@ -1,4 +1,3 @@
-
 class Protagonista {
 
     constructor() {
@@ -9,7 +8,6 @@ class Protagonista {
         this.velocidade = 4;
         this.velocidadeCorrida = 8;
 
-        // Caminhada
         this.quadro = 0;
         this.totalQuadros = 8;
         this.ultimoTempo = 0;
@@ -18,7 +16,6 @@ class Protagonista {
         this.direcao = "direita";
         this.andando = false;
 
-        // Arremesso
         this.arremessando = false;
         this.quadroArremesso = 0;
         this.ultimoTempoArremesso = 0;
@@ -27,7 +24,6 @@ class Protagonista {
 
         this.arremesso = new Arremesso();
 
-        // Hitbox
         this.hitbox = {
             largura: 90,
             altura: 170,
@@ -35,7 +31,6 @@ class Protagonista {
             offsetY: 35
         };
 
-        // Pulo
         this.pulo = new Pular();
     }
 
@@ -93,7 +88,6 @@ class Protagonista {
             if (this.quadroArremesso < 7) {
                 this.quadroArremesso++;
 
-                // Lança a bola ao chegar ao último frame
                 if (this.quadroArremesso === 7 && !this.bolaLancada) {
 
                     let direcao = this.direcao === "direita" ? 1 : -1;
@@ -143,7 +137,6 @@ class Protagonista {
     desenhar() {
         let posicaoChao = height * 0.87;
 
-        // Animação de arremesso
         if (this.arremessando) {
             if (arremessandoSprite && arremessandoSprite.width > 0) {
 
@@ -187,29 +180,48 @@ class Protagonista {
             }
         }
 
-        // Animação de pulo
         if (this.pulo.pulando) {
             if (!puloSprite || puloSprite.width === 0) return;
 
             let larguraQuadro = puloSprite.width / 8;
             let origemX = this.pulo.quadro * larguraQuadro;
 
-            image(
-                puloSprite,
-                this.x,
-                posicaoChao - this.altura + this.pulo.deslocamentoY,
-                this.largura,
-                this.altura,
-                origemX,
-                150,
-                larguraQuadro,
-                650
-            );
+            push();
 
+            if (this.direcao === "esquerda") {
+                translate(this.x + this.largura, 0);
+                scale(-1, 1);
+
+                image(
+                    puloSprite,
+                    0,
+                    posicaoChao - this.altura + this.pulo.deslocamentoY,
+                    this.largura,
+                    this.altura,
+                    origemX,
+                    150,
+                    larguraQuadro,
+                    650
+                );
+
+            } else {
+                image(
+                    puloSprite,
+                    this.x,
+                    posicaoChao - this.altura + this.pulo.deslocamentoY,
+                    this.largura,
+                    this.altura,
+                    origemX,
+                    150,
+                    larguraQuadro,
+                    650
+                );
+            }
+
+            pop();
             return;
         }
 
-        // Animação de caminhada
         let sprite = this.direcao === "direita"
             ? andandoDireita
             : andandoEsquerda;
