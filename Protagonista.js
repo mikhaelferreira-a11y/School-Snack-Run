@@ -5,17 +5,29 @@ class Protagonista {
         this.x = 100;
         this.largura = 180;
         this.altura = 220;
- 
+
         this.velocidade = 4;
         this.velocidadeCorrida = 8;
 
+        // Caminhada
         this.quadro = 0;
         this.totalQuadros = 8;
         this.ultimoTempo = 0;
         this.intervaloAnimacao = 120;
+
         this.direcao = "direita";
         this.andando = false;
 
+        // Arremesso
+        this.arremessando = false;
+        this.quadroArremesso = 0;
+        this.ultimoTempoArremesso = 0;
+        this.intervaloArremesso = 100;
+        this.bolaLancada = false;
+
+        this.arremesso = new Arremesso();
+
+        // Hitbox
         this.hitbox = {
             largura: 90,
             altura: 170,
@@ -23,10 +35,25 @@ class Protagonista {
             offsetY: 35
         };
 
+        // Pulo
         this.pulo = new Pular();
     }
 
+    iniciarArremesso() {
+        if (this.arremessando || this.pulo.pulando) return;
+
+        this.arremessando = true;
+        this.quadroArremesso = 0;
+        this.ultimoTempoArremesso = millis();
+        this.bolaLancada = false;
+    }
+
     movimentar() {
+        if (this.arremessando) {
+            this.andando = false;
+            return;
+        }
+
         let direita = keyIsDown(68) || keyIsDown(RIGHT_ARROW);
         let esquerda = keyIsDown(65) || keyIsDown(LEFT_ARROW);
 
@@ -58,8 +85,46 @@ class Protagonista {
         }
     }
 
+    atualizarArremesso() {
+        if (!this.arremessando) return;
+
+        if (millis() - this.ultimoTempoArremesso >= this.intervaloArremesso) {
+
+            if (this.quadroArremesso < 7) {
+                this.quadroArremesso++;
+
+                // Lança a bola ao chegar ao último frame
+                if (this.quadroArremesso === 7 && !this.bolaLancada) {
+
+                    let direcao = this.direcao === "direita" ? 1 : -1;
+
+                    let posicaoX = direcao === 1
+                        ? this.x + this.largura - 20
+                        : this.x + 20;
+
+                    let posicaoY = height * 0.87 - this.altura + 110;
+
+                    this.arremesso.lancar(
+                        posicaoX,
+                        posicaoY,
+                        direcao
+                    );
+
+                    this.bolaLancada = true;
+                }
+
+            } else {
+                this.arremessando = false;
+                this.quadroArremesso = 0;
+                this.bolaLancada = false;
+            }
+
+            this.ultimoTempoArremesso = millis();
+        }
+    }
+
     animar() {
-        if (!this.andando || this.pulo.pulando) {
+        if (!this.andando || this.pulo.pulando || this.arremessando) {
             this.quadro = 0;
             return;
         }
@@ -78,6 +143,51 @@ class Protagonista {
     desenhar() {
         let posicaoChao = height * 0.87;
 
+        // Animação de arremesso
+        if (this.arremessando) {
+            if (arremessandoSprite && arremessandoSprite.width > 0) {
+
+                let larguraQuadro = arremessandoSprite.width / 8;
+                let origemX = this.quadroArremesso * larguraQuadro;
+
+                push();
+
+                if (this.direcao === "esquerda") {
+                    translate(this.x + this.largura, 0);
+                    scale(-1, 1);
+
+                    image(
+                        arremessandoSprite,
+                        0,
+                        posicaoChao - this.altura,
+                        this.largura,
+                        this.altura,
+                        origemX,
+                        0,
+                        larguraQuadro,
+                        arremessandoSprite.height
+                    );
+
+                } else {
+                    image(
+                        arremessandoSprite,
+                        this.x,
+                        posicaoChao - this.altura,
+                        this.largura,
+                        this.altura,
+                        origemX,
+                        0,
+                        larguraQuadro,
+                        arremessandoSprite.height
+                    );
+                }
+
+                pop();
+                return;
+            }
+        }
+
+        // Animação de pulo
         if (this.pulo.pulando) {
             if (!puloSprite || puloSprite.width === 0) return;
 
@@ -98,14 +208,11 @@ class Protagonista {
 
             return;
         }
-        
-        let sprite;
 
-        if (this.direcao === "direita") {
-            sprite = andandoDireita;
-        } else {
-            sprite = andandoEsquerda;
-        }
+        // Animação de caminhada
+        let sprite = this.direcao === "direita"
+            ? andandoDireita
+            : andandoEsquerda;
 
         if (!sprite || sprite.width === 0) return;
 
@@ -153,6 +260,7 @@ class Protagonista {
     atualizar() {
         this.movimentar();
         this.pulo.atualizar();
+        this.atualizarArremesso();
         this.animar();
         this.desenhar();
     }

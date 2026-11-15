@@ -41,4 +41,42 @@ class HUD {
 
         textStyle(NORMAL);
     }
+
+    desenharVida(vida, vidaMaxima) {
+
+        let x = 30;
+        let y = 30;
+
+        let largura = 220;
+        let altura = 18;
+
+        noStroke();
+        fill(50);
+        rect(x, y, largura, altura);
+
+        let porcentagem = constrain(
+            vida / vidaMaxima,
+            0,
+            1
+        );
+
+    
+        fill(0, 200, 0);
+        rect(
+            x,
+            y,
+            largura * porcentagem,
+            altura
+        );
+
+     
+        fill(255);
+        textSize(16);
+        textAlign(LEFT, BOTTOM);
+        text(
+            "HP: " + vida + "/" + vidaMaxima,
+            x,
+            y - 5
+        );
+    }
 }

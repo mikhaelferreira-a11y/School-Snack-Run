@@ -1,10 +1,10 @@
-
 let jogador;
 
 let andandoDireita;
 let andandoEsquerda;
 let puloSprite;
 let imagemMoeda;
+let arremessandoSprite;
 
 let cameraX = 0;
 
@@ -12,17 +12,23 @@ let coletaveis = [];
 let dinheiro = 0;
 let coletaveisCriados = false;
 
+// Vida
+let vida = 100;
+let vidaMaxima = 100;
+
 let hud;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
 
     dinheiro = 0;
+    vida = 100;
 
     andandoDireita = loadImage("assets/andandoDireita.png");
     andandoEsquerda = loadImage("assets/andandoEsquerda.png");
     puloSprite = loadImage("assets/pulo.png");
     imagemMoeda = loadImage("assets/moeda.png");
+    arremessandoSprite = loadImage("assets/arremessando.png");
 
     carregarMapa1();
 
@@ -39,14 +45,14 @@ function criarColetaveis() {
         coletaveis.push(
             new Coletavel(
                 inicio + larguraCenario1 * 0.50,
-                height * 0.87 - 120
+                height * 0.87 - 85
             )
         );
 
         coletaveis.push(
             new Coletavel(
-                inicio + larguraCenario1 * 1,
-                height * 0.87 - 170
+                inicio + larguraCenario1 * 0.70,
+                height * 0.87 - 150
             )
         );
     }
@@ -63,6 +69,7 @@ function draw() {
         criarColetaveis();
     }
 
+    // Câmera
     if (larguraMapa > 0) {
         cameraX = jogador.x - width / 2 + jogador.largura / 2;
 
@@ -73,13 +80,21 @@ function draw() {
         );
     }
 
+    // Cenário
     desenharMapa1(cameraX);
 
+    // Mundo do jogo
     push();
     translate(-cameraX, 0);
 
+    // Personagem
     jogador.atualizar();
 
+    // Bolas arremessadas
+    jogador.arremesso.atualizar();
+    jogador.arremesso.desenhar();
+
+    // Moedas
     for (let i = coletaveis.length - 1; i >= 0; i--) {
         let moeda = coletaveis[i];
 
@@ -92,7 +107,9 @@ function draw() {
 
     pop();
 
+    // HUD
     hud.desenhar(dinheiro);
+    hud.desenharVida(vida, vidaMaxima);
 }
 
 function windowResized() {
@@ -101,7 +118,7 @@ function windowResized() {
 }
 
 function keyPressed() {
-    if (key === "f" || key === "F") {
-        fullscreen(!fullscreen());
+    if ((key === "x" || key === "X") && jogador) {
+        jogador.iniciarArremesso();
     }
 }
